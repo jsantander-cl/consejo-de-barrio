@@ -38,7 +38,7 @@ export default function TopBar({ onOpenDrawer, title = 'Consejo de Barrio' }) {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-on-surface leading-tight">{user?.nombre}</span>
-              <span className="text-xs text-secondary font-medium capitalize">{user?.rol?.replace('_', ' ')}</span>
+              <span className="text-xs text-secondary font-medium capitalize">{user?.organizaciones?.nombre && ` ${user.organizaciones.nombre}`}</span>
             </div>
           </div>
         </div>

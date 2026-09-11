@@ -1,14 +1,20 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Key, Eye, EyeOff, Lock, ArrowRight, ShieldCheck } from 'lucide-react'
+import { supabase } from '../lib/supabaseClient.js'
 
 export default function Login() {
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    // TODO: reemplazar por supabase.auth.signInWithPassword({ email, password })
+    setError(null)
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) { setError(error.message); return }
     navigate('/')
   }
 
@@ -46,6 +52,9 @@ export default function Login() {
               </p>
             </div>
 
+            {error && (
+              <p className="mb-3 text-sm text-error bg-error-container/40 border border-error/30 rounded-lg px-3 py-2">{error}</p>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-xs font-semibold text-on-surface mb-1">
@@ -57,6 +66,8 @@ export default function Login() {
                     id="email"
                     type="email"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="ejemplo@iglesia.org"
                     className="w-full pl-9 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   />
@@ -74,6 +85,8 @@ export default function Login() {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     className="w-full pl-9 pr-9 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   />

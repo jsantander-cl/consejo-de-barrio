@@ -14,17 +14,23 @@ export default function Sidebar() {
             {iniciales}
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-primary truncate">{user?.nombre}</p>
-            <p className="text-xs text-on-surface-variant truncate capitalize">{user?.rol?.replace('_', ' ')}</p>
+            <p className="font-semibold text-primary truncate">
+              {user?.nombre}
+            </p>
+            <p className="text-xs text-on-surface-variant truncate capitalize">
+              {user?.organizaciones?.nombre &&
+                `  ${user.organizaciones.nombre}`}
+            </p>
             <span className="text-xs text-secondary font-medium flex items-center gap-1 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary" /> Sesión activa
+              <span className="w-1.5 h-1.5 rounded-full bg-secondary" /> Sesión
+              activa
             </span>
           </div>
         </div>
 
         <nav className="flex flex-col gap-1">
           {NAV_ITEMS.map(({ to, label, icon: Icon, end, restringido }) => {
-            if (restringido && !puedeVerReunionesObispado) return null
+            if (restringido && !puedeVerReunionesObispado) return null;
             return (
               <NavLink
                 key={to}
@@ -33,15 +39,15 @@ export default function Sidebar() {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-secondary-container text-on-secondary-container'
-                      : 'text-on-surface-variant hover:bg-surface-container'
+                      ? "bg-secondary-container text-on-secondary-container"
+                      : "text-on-surface-variant hover:bg-surface-container"
                   }`
                 }
               >
                 <Icon size={20} />
                 <span>{label}</span>
               </NavLink>
-            )
+            );
           })}
         </nav>
       </div>
@@ -53,5 +59,5 @@ export default function Sidebar() {
         </p>
       </div>
     </aside>
-  )
+  );
 }
