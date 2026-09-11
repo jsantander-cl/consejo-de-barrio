@@ -32,10 +32,16 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe()
   }, [])
 
+  // 1. Agregamos la función signOut antes del return para cerrar sesión en Supabase
+  async function signOut() {
+    await supabase.auth.signOut()
+  }
+
   const puedeVerReunionesObispado = user ? ROLES_ACCESO_OBISPADO.includes(user.rol) : false
 
+  // 2. Agregamos 'signOut' al value del AuthContext.Provider
   return (
-    <AuthContext.Provider value={{ user, cargando, puedeVerReunionesObispado }}>
+    <AuthContext.Provider value={{ user, cargando, puedeVerReunionesObispado, signOut }}>
       {children}
     </AuthContext.Provider>
   )

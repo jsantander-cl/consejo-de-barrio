@@ -12,6 +12,7 @@ import Compromisos from './pages/Compromisos.jsx'
 import SendaConvenios from './pages/SendaConvenios.jsx'
 import Actividades from './pages/Actividades.jsx'
 import Calendario from './pages/Calendario.jsx'
+import Organizaciones from './pages/Organizaciones.jsx'
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/senda-convenios" element={<SendaConvenios />} />
           <Route path="/actividades" element={<Actividades />} />
           <Route path="/calendario" element={<Calendario />} />
+          <Route path="/organizaciones" element={<Organizaciones />} />
         </Route>
       </Routes>
     </AuthProvider>

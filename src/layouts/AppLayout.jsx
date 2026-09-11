@@ -7,10 +7,18 @@ import MobileDrawer from '../components/MobileDrawer.jsx'
 
 export default function AppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === '1')
+
+  function toggleCollapsed() {
+    setCollapsed((prev) => {
+      localStorage.setItem('sidebar_collapsed', prev ? '0' : '1')
+      return !prev
+    })
+  }
 
   return (
     <div className="flex h-full">
-      <Sidebar />
+      <Sidebar collapsed={collapsed} onToggleCollapsed={toggleCollapsed} />
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0">
