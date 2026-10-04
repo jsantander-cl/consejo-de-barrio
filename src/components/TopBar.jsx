@@ -33,7 +33,7 @@ export default function TopBar({ onOpenDrawer, title = 'Consejo de Barrio' }) {
   useEffect(() => {
     cargarNotificaciones()
 
-    // Opcional: Suscripción en tiempo real para nuevas notificaciones
+    // Suscripción en tiempo real para nuevas notificaciones
     const channel = supabase
       .channel('public:notificaciones')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notificaciones' }, (payload) => {
@@ -77,7 +77,8 @@ export default function TopBar({ onOpenDrawer, title = 'Consejo de Barrio' }) {
   const tieneNoLeidas = notificaciones.some(n => !n.leida)
 
   return (
-    <header className="sticky top-0 z-40 bg-surface shadow-sm">
+    /* Cambiado a bg-white con borde inferior para fondo blanco uniforme */
+    <header className="sticky top-0 z-40 bg-white border-b border-outline-variant/30 shadow-xs">
       <div className="flex justify-between items-center w-full px-4 md:px-8 h-14 md:h-16">
         <div className="flex items-center gap-3">
           <button
@@ -108,7 +109,7 @@ export default function TopBar({ onOpenDrawer, title = 'Consejo de Barrio' }) {
             >
               <Bell size={20} />
               {tieneNoLeidas && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-error ring-2 ring-surface animate-pulse" />
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-error ring-2 ring-white animate-pulse" />
               )}
             </button>
 
@@ -158,7 +159,7 @@ export default function TopBar({ onOpenDrawer, title = 'Consejo de Barrio' }) {
           </div>
 
           {/* ----------------------------------------- */}
-          {/* PERFIL Y MENÚ DE USUARIO                   */}
+          {/* PERFIL Y MENÚ DE USUARIO                  */}
           {/* ----------------------------------------- */}
           <div className="relative" ref={menuRef}>
             <button
@@ -179,7 +180,7 @@ export default function TopBar({ onOpenDrawer, title = 'Consejo de Barrio' }) {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden">
+              <div className="absolute right-0 mt-2 w-52 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden z-50">
                 <button
                   onClick={() => { setMenuOpen(false); navigate('/perfil') }}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container text-left"
