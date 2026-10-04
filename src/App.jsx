@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import Reuniones from './pages/Reuniones.jsx'
 import ReunionDetalle from './pages/ReunionDetalle.jsx'
 import ReunionObispado from './pages/ReunionObispado.jsx'
+import Discursantes from './pages/Discursantes.jsx'
 import Compromisos from './pages/Compromisos.jsx'
 import SendaConvenios from './pages/SendaConvenios.jsx'
 import Actividades from './pages/Actividades.jsx'
@@ -45,6 +46,16 @@ export default function App() {
                 }
               />
 
+              {/* Gestión reservada de Discursantes */}
+              <Route
+                path="/discursantes"
+                element={
+                  <RutaProtegidaObispado>
+                    <Discursantes />
+                  </RutaProtegidaObispado>
+                }
+              />
+
               <Route path="/compromisos" element={<Compromisos />} />
               <Route path="/senda-convenios" element={<SendaConvenios />} />
               <Route path="/actividades" element={<Actividades />} />
@@ -54,7 +65,7 @@ export default function App() {
             </Route>
           </Route>
 
-          {/* 3. Redirección por defecto si la URL no existe o el usuario intenta navegar a una ruta inválida */}
+          {/* 3. Redirección por defecto si la URL no existe */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AsignacionesProvider>

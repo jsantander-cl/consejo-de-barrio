@@ -1,0 +1,66 @@
+C:\Users\HP PRO BOOK\Desktop\FRONTEND\PROYECTOS\Consejo-de-Barrio
+├── eslint.config.js
+├── index.html
+├── node_modules
+|  ├── @supabase
+|  ├── @tailwindcss
+|  ├── @vitejs
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── public
+|  ├── favicon.svg
+|  └── icons.svg
+├── README.md
+├── src
+|  ├── App.css
+|  ├── App.jsx
+|  ├── assets
+|  |  ├── hero.png
+|  |  ├── react.svg
+|  |  └── vite.svg
+|  ├── components
+|  |  ├── BottomNav.jsx
+|  |  ├── MobileDrawer.jsx
+|  |  ├── Modal.jsx
+|  |  ├── modals
+|  |  |  ├── AgendarReunionCalendarioModal.jsx
+|  |  |  ├── DetalleAsignacionModal.jsx
+|  |  |  ├── EditarHitoModal.jsx
+|  |  |  ├── NuevaActividadModal.jsx
+|  |  |  ├── NuevaAsignacionModal.jsx
+|  |  |  ├── NuevaReunionModal.jsx
+|  |  |  ├── NuevoMiembroModal.jsx
+|  |  |  └── ReasignarModal.jsx
+|  |  ├── ProtectedRoute.jsx
+|  |  ├── RutaProtegidaObispado.jsx
+|  |  ├── Sidebar.jsx
+|  |  ├── TopBar.jsx
+|  |  └── ui.jsx
+|  ├── index.css
+|  ├── layouts
+|  |  └── AppLayout.jsx
+|  ├── lib
+|  |  ├── AsignacionesContext.jsx
+|  |  ├── AuthContext.jsx
+|  |  ├── navigation.js
+|  |  ├── supabaseClient.js
+|  |  └── useUsuarios.js
+|  ├── main.jsx
+|  ├── pages
+|  |  ├── Actividades.jsx
+|  |  ├── Calendario.jsx
+|  |  ├── Compromisos.jsx
+|  |  ├── Dashboard.jsx
+|  |  ├── Login.jsx
+|  |  ├── Organizaciones.jsx
+|  |  ├── Perfil.jsx
+|  |  ├── ReunionDetalle.jsx
+|  |  ├── Reuniones.jsx
+|  |  ├── ReunionObispado.jsx
+|  |  └── SendaConvenios.jsx
+|  └── {components,pages,layouts,lib}
+└── vite.config.js
+
+directory: 13 file: 49 symboliclink: 9
+

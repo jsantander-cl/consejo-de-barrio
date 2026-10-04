@@ -1,5 +1,12 @@
 import {
-  LayoutDashboard, CalendarClock, ClipboardCheck, Flag, CalendarDays, Users, Lock,
+  LayoutDashboard,
+  CalendarClock,
+  ClipboardCheck,
+  Flag,
+  CalendarDays,
+  Users,
+  Lock,
+  Mic,
 } from 'lucide-react'
 
 // Fuente única de verdad para la navegación. Cambia aquí y se refleja en
@@ -8,6 +15,7 @@ export const NAV_ITEMS = [
   { to: '/', label: 'Tablero General', icon: LayoutDashboard, end: true },
   { to: '/reuniones', label: 'Consejo de Barrio', icon: CalendarClock },
   { to: '/reuniones/obispado', label: 'Obispado', icon: Lock, restringido: true },
+  { to: '/discursantes', label: 'Discursantes', icon: Mic, restringido: true },
   { to: '/compromisos', label: 'Compromisos y Tareas', icon: ClipboardCheck },
   { to: '/senda-convenios', label: 'Senda de Convenios', icon: Flag },
   { to: '/actividades', label: 'Planificador de Actividades', icon: CalendarDays },
