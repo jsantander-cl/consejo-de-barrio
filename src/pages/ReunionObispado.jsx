@@ -1,30 +1,132 @@
-import { useState } from 'react'
-import { ChevronDown, Lock, ShieldCheck } from 'lucide-react'
-import { Card, StatusBadge } from '../components/ui.jsx'
+import { useState, useEffect, useRef } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { ChevronDown, Lock, ShieldCheck, ArrowLeft, Clock } from 'lucide-react'
+import { StatusBadge } from '../components/ui.jsx'
+import { supabase } from '../lib/supabaseClient.js'
 
-// Las 8 secciones canónicas de la Reunión de Obispado (Manual General 7.3).
-// TODO: reemplazar por agenda_items WHERE reunion_id = :id AND categoria pertenece
-// al set de categorías 'obispado'
-const SECCIONES = [
-  { id: 1, titulo: 'Apertura y devocional', desc: 'Himno, oración, pensamiento doctrinal', estado: 'Cumplido' },
-  { id: 2, titulo: 'Coordinación de la obra de salvación y exaltación', desc: 'Ministración de familias prioritarias', estado: 'En progreso' },
-  { id: 3, titulo: 'Fortalecimiento de jóvenes y niños', desc: 'Énfasis Sacerdocio Aarónico y Mujeres Jóvenes', estado: 'En deliberación' },
-  { id: 4, titulo: 'Preparación para ordenanzas sagradas', desc: 'Bautismos, ordenaciones, bendiciones de niños', estado: '3 casos' },
-  { id: 5, titulo: 'Llamamientos a cargos del barrio', desc: 'Propuestas de relevos y vacantes', estado: 'En oración' },
-  { id: 6, titulo: 'Recomendaciones para servicio misional', desc: 'Candidatos en preparación', estado: '1 candidato' },
-  { id: 7, titulo: 'Organizaciones, programas y presupuesto', desc: 'Asignaciones trimestrales, bienestar temporal', estado: 'Revisado' },
-  { id: 8, titulo: 'Revisión de escrituras y Manual General', desc: 'Cartas de la Primera Presidencia', estado: 'Al día' },
+const SECCIONES_OBISPADO = [
+  { id: 1, titulo: 'Apertura y devocional', desc: 'Himno, oración, pensamiento doctrinal' },
+  { id: 2, titulo: 'Coordinación de la obra de salvación y exaltación', desc: 'Ministración de familias prioritarias' },
+  { id: 3, titulo: 'Fortalecimiento de jóvenes y niños', desc: 'Énfasis Sacerdocio Aarónico y Mujeres Jóvenes' },
+  { id: 4, titulo: 'Preparación para ordenanzas sagradas', desc: 'Bautismos, ordenaciones, bendiciones de niños' },
+  { id: 5, titulo: 'Llamamientos a cargos del barrio', desc: 'Propuestas de relevos y vacantes' },
+  { id: 6, titulo: 'Recomendaciones para servicio misional', desc: 'Candidatos en preparación' },
+  { id: 7, titulo: 'Organizaciones, programas y presupuesto', desc: 'Asignaciones trimestrales, bienestar temporal' },
+  { id: 8, titulo: 'Revisión de escrituras y Manual General', desc: 'Cartas de la Primera Presidencia' },
 ]
 
+const ESTADOS_CONFIG = {
+  'Pendiente': { bg: 'bg-slate-100 text-slate-700 border-slate-300', dot: 'bg-slate-400' },
+  'En progreso': { bg: 'bg-amber-100 text-amber-800 border-amber-300', dot: 'bg-amber-500' },
+  'En deliberación': { bg: 'bg-blue-100 text-blue-800 border-blue-300', dot: 'bg-blue-500' },
+  'Cumplido': { bg: 'bg-emerald-100 text-emerald-800 border-emerald-300', dot: 'bg-emerald-600' },
+  'Revisado': { bg: 'bg-purple-100 text-purple-800 border-purple-300', dot: 'bg-purple-500' },
+  'En oración': { bg: 'bg-rose-100 text-rose-800 border-rose-300', dot: 'bg-rose-500' }
+}
+
+const ESTADOS_OBISPADO = ['Pendiente', 'En progreso', 'En deliberación', 'Cumplido', 'Revisado', 'En oración']
+
 export default function ReunionObispado() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+
+  const [reunion, setReunion] = useState(null)
   const [abiertas, setAbiertas] = useState({})
-  function toggle(id) {
-    setAbiertas((prev) => ({ ...prev, [id]: !prev[id] }))
+  const [notasAgenda, setNotasAgenda] = useState({})
+  const [cargando, setCargando] = useState(true)
+  const [guardandoId, setGuardandoId] = useState(null)
+
+  const [menuEstadoAbierto, setMenuEstadoAbierto] = useState(null)
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    async function cargarReunionYNotas() {
+      setCargando(true)
+
+      if (id) {
+        const { data: revData } = await supabase
+          .from('reuniones')
+          .select('*, presidida:usuarios!reuniones_presidida_por_fkey(nombre)')
+          .eq('id', id)
+          .single()
+
+        if (revData) setReunion(revData)
+
+        const { data: notasData } = await supabase
+          .from('reunion_agenda_notas')
+          .select('*')
+          .eq('reunion_id', id)
+
+        if (notasData) {
+          const mapaNotas = {}
+          notasData.forEach(n => {
+            mapaNotas[n.seccion_id] = { estado: n.estado, notas: n.notas || '', dbId: n.id }
+          })
+          setNotasAgenda(mapaNotas)
+        }
+      }
+      setCargando(false)
+    }
+
+    cargarReunionYNotas()
+
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuEstadoAbierto(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [id])
+
+  const toggle = (seccionId) => {
+    setAbiertas(prev => ({ ...prev, [seccionId]: !prev[seccionId] }))
+  }
+
+  const actualizarSeccion = async (seccionId, campo, valor) => {
+    const actual = notasAgenda[seccionId] || { estado: 'Pendiente', notas: '' }
+    const nuevoObjeto = { ...actual, [campo]: valor }
+
+    setNotasAgenda(prev => ({
+      ...prev,
+      [seccionId]: nuevoObjeto
+    }))
+
+    if (campo === 'estado') {
+      setMenuEstadoAbierto(null)
+    }
+
+    if (id) {
+      setGuardandoId(seccionId)
+      await supabase
+        .from('reunion_agenda_notas')
+        .upsert({
+          reunion_id: id,
+          seccion_id: seccionId,
+          estado: nuevoObjeto.estado,
+          notas: nuevoObjeto.notas,
+          updated_at: new Date()
+        }, { onConflict: 'reunion_id,seccion_id' })
+      setGuardandoId(null)
+    }
+  }
+
+  if (cargando) {
+    return <div className="p-8 text-sm text-on-surface-variant">Cargando agenda confidencial de obispado...</div>
   }
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest overflow-hidden">
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => navigate('/reuniones')}
+          className="inline-flex items-center gap-2 text-xs font-bold text-primary hover:underline bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/30"
+        >
+          <ArrowLeft size={16} /> Volver al Calendario
+        </button>
+      </div>
+
+      <section className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest overflow-hidden shadow-sm">
         <div className="bg-primary-container px-4 py-2 flex items-center justify-between text-on-primary-container">
           <div className="flex items-center gap-2">
             <Lock size={16} />
@@ -47,54 +149,108 @@ export default function ReunionObispado() {
       </section>
 
       <div>
-        <h1 className="text-xl font-semibold text-primary">Agenda Ordinaria de Obispado</h1>
-        <p className="text-sm text-on-surface-variant mt-1">Domingo, 18 de mayo · 06:30 – 08:00 AM · Salón del Obispado</p>
+        <h1 className="text-2xl font-bold text-primary tracking-tight">Agenda Ordinaria de Obispado</h1>
+        <p className="text-sm text-on-surface-variant mt-1">
+          {reunion?.fecha ? new Date(reunion.fecha).toLocaleDateString('es-ES', { dateStyle: 'full' }) : 'Domingo · Sesión Ordinaria'}
+          {reunion?.presidida?.nombre && ` · Preside: ${reunion.presidida.nombre}`}
+        </p>
       </div>
 
       <div className="space-y-3">
-        {SECCIONES.map((s) => (
-          <div key={s.id} className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 overflow-hidden">
-            <button
-              onClick={() => toggle(s.id)}
-              className="w-full p-4 flex items-center justify-between hover:bg-surface-container/50 text-left"
-            >
-              <div className="flex items-center gap-3">
-                <span className="w-7 h-7 rounded-full bg-surface-container text-primary text-sm font-bold flex items-center justify-center shrink-0">
-                  {s.id}
-                </span>
-                <div>
-                  <h3 className="font-semibold text-primary">{s.titulo}</h3>
-                  <span className="text-xs text-outline">{s.desc}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <StatusBadge status="neutral">{s.estado}</StatusBadge>
-                <ChevronDown size={18} className={`text-outline transition-transform ${abiertas[s.id] ? 'rotate-180' : ''}`} />
-              </div>
-            </button>
-            {abiertas[s.id] && (
-              <div className="px-4 pb-4 pt-2 border-t border-outline-variant/20 bg-surface-container-low/30">
-                <div className="p-3 rounded-lg bg-surface-container border border-outline-variant/30 flex items-center gap-2 text-sm text-on-surface mb-3">
-                  <Lock size={16} className="text-secondary shrink-0" />
-                  <span>Notas bajo discreción: nombres reservados, no visibles para el consejo general.</span>
-                </div>
-                <textarea
-                  rows={3}
-                  placeholder="Notas confidenciales de deliberación..."
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface-container-lowest focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+        {SECCIONES_OBISPADO.map((s) => {
+          const infoSeccion = notasAgenda[s.id] || { estado: 'Pendiente', notas: '' }
+          const estaAbierto = !!abiertas[s.id]
+          const estaGuardando = guardandoId === s.id
+          const configEstado = ESTADOS_CONFIG[infoSeccion.estado] || ESTADOS_CONFIG['Pendiente']
+          const menuAbiertoEste = menuEstadoAbierto === s.id
 
-      <Card title="Asignaciones y acuerdos confidenciales" subtitle="Compromisos adquiridos durante la sesión">
-        <p className="text-sm text-on-surface-variant">
-          TODO: listar `asignaciones` filtradas por esta reunión, con responsable y fecha límite,
-          igual que en la vista de Consejo de Barrio.
-        </p>
-      </Card>
+          return (
+            /* Se removió overflow-hidden para permitir el despliegue flotante libre del menú */
+            <div key={s.id} className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-xs transition-all">
+              <div className="w-full p-4 flex items-center justify-between hover:bg-surface-container/30 rounded-2xl">
+                <button
+                  onClick={() => toggle(s.id)}
+                  className="flex items-center gap-3 text-left flex-1 focus:outline-none"
+                >
+                  <span className="w-8 h-8 rounded-full bg-surface-container text-primary text-sm font-bold flex items-center justify-center shrink-0 shadow-xs">
+                    {s.id}
+                  </span>
+                  <div>
+                    <h3 className="font-bold text-primary text-sm md:text-base">{s.titulo}</h3>
+                    <span className="text-xs text-on-surface-variant">{s.desc}</span>
+                  </div>
+                </button>
+
+                <div className="flex items-center gap-3 shrink-0 relative" ref={menuAbiertoEste ? menuRef : null}>
+                  {/* PÍLDORA DESPLEGABLE CON Z-50 ABSOLUTO */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setMenuEstadoAbierto(menuAbiertoEste ? null : s.id)
+                      }}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-xs cursor-pointer ${configEstado.bg}`}
+                    >
+                      <span className={`w-2 h-2 rounded-full ${configEstado.dot}`} />
+                      <span>{infoSeccion.estado}</span>
+                      <ChevronDown size={14} className={`transition-transform duration-200 ${menuAbiertoEste ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {menuAbiertoEste && (
+                      <div className="absolute right-0 mt-2 w-48 bg-surface rounded-2xl shadow-2xl border border-outline-variant/30 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                        {ESTADOS_OBISPADO.map((est) => {
+                          const cfg = ESTADOS_CONFIG[est]
+                          const seleccionado = infoSeccion.estado === est
+                          return (
+                            <button
+                              key={est}
+                              type="button"
+                              onClick={() => actualizarSeccion(s.id, 'estado', est)}
+                              className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center gap-2.5 transition-colors ${
+                                seleccionado ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface hover:bg-surface-container'
+                              }`}
+                            >
+                              <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+                              <span>{est}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <button onClick={() => toggle(s.id)} className="p-1 text-outline">
+                    <ChevronDown size={18} className={`transition-transform ${estaAbierto ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
+              </div>
+
+              {estaAbierto && (
+                <div className="px-4 pb-4 pt-2 border-t border-outline-variant/20 bg-surface-container-low/30 space-y-3 rounded-b-2xl">
+                  <div className="flex items-center justify-between text-xs text-on-surface-variant px-1">
+                    <span className="flex items-center gap-1 text-secondary font-medium">
+                      <Lock size={14} /> Notas bajo discreción: nombres reservados, no visibles para el consejo general.
+                    </span>
+                    {estaGuardando && (
+                      <span className="text-emerald-700 font-medium flex items-center gap-1 animate-pulse">
+                        <Clock size={12} /> Guardando...
+                      </span>
+                    )}
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={infoSeccion.notas}
+                    onChange={(e) => actualizarSeccion(s.id, 'notas', e.target.value)}
+                    placeholder="Notas confidenciales de deliberación..."
+                    className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-xs"
+                  />
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
