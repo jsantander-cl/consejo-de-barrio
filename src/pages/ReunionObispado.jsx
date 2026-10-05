@@ -130,7 +130,7 @@ export default function ReunionObispado() {
         <div className="bg-primary-container px-4 py-2 flex items-center justify-between text-on-primary-container">
           <div className="flex items-center gap-2">
             <Lock size={16} />
-            <span className="text-xs tracking-wider uppercase font-semibold">Registro de carácter sagrado y reservado</span>
+            <span className="text-white text-xs tracking-wider uppercase font-semibold">Registro de carácter sagrado y reservado</span>
           </div>
         </div>
         <div className="p-4 md:p-6 flex items-center justify-between gap-3">
