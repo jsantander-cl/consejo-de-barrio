@@ -139,32 +139,32 @@ export default function SendaConvenios() {
                 </div>
               </div>
 
-              {/* Vista Desplegada: Línea horizontal con números para pendientes e íconos para completado/en curso */}
+              {/* Vista Desplegada: Grid Adaptativo (3 cols en móvil, 4 en tablet, 6 en desktop) */}
               {estaExpandido && (
-                <div className="p-6 md:p-10 border-t border-outline-variant/20 bg-white overflow-x-auto">
-                  <div className="min-w-[800px] grid grid-cols-6 gap-y-12 gap-x-0 relative">
+                <div className="p-4 md:p-8 border-t border-outline-variant/20 bg-white">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-y-10 gap-x-2 relative">
                     {hitos.map((h, index) => {
                       const numeroHito = h.checklist_senda_convenios?.orden || index + 1
-                      const esFinDeFila = (index + 1) % 6 === 0
                       const esUltimoGlobal = index === hitos.length - 1
 
                       return (
                         <div key={h.id} className="relative flex flex-col items-center">
-                          {/* Línea horizontal que conecta los círculos en la misma fila */}
-                          {!esFinDeFila && !esUltimoGlobal && (
+                          {/* Línea horizontal continua adaptativa */}
+                          {!esUltimoGlobal && (
                             <div className="absolute left-[50%] right-[-50%] top-[20px] h-[2px] bg-outline-variant/40 z-0 pointer-events-none" />
                           )}
 
                           <button
+                            type="button"
                             onClick={() =>
                               setHitoSeleccionado({
                                 ...h,
                                 nombreHito: h.checklist_senda_convenios?.nombre_hito,
                               })
                             }
-                            className="flex flex-col items-center text-center group focus:outline-none relative z-10 w-full px-2"
+                            className="flex flex-col items-center text-center group focus:outline-none relative z-10 w-full px-1"
                           >
-                            {/* Círculo que varía estilo e ícono/número según estado */}
+                            {/* Círculo con estado e ícono */}
                             <div
                               className={`w-10 h-10 rounded-full flex items-center justify-center shadow-xs transition-transform group-hover:scale-110 ${
                                 h.estado === 'completado'
@@ -177,7 +177,7 @@ export default function SendaConvenios() {
                               <ContenidoCirculoHito estado={h.estado} numero={numeroHito} />
                             </div>
 
-                            <span className="mt-2 text-xs font-semibold text-primary leading-tight line-clamp-2">
+                            <span className="mt-2 text-[11px] font-semibold text-primary leading-tight line-clamp-2">
                               {h.checklist_senda_convenios?.nombre_hito}
                             </span>
 

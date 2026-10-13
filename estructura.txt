@@ -13,7 +13,6 @@ C:\Users\HP PRO BOOK\Desktop\FRONTEND\PROYECTOS\Consejo-de-Barrio
 |  └── icons.svg
 ├── README.md
 ├── src
-|  ├── App.css
 |  ├── App.jsx
 |  ├── assets
 |  |  ├── hero.png
@@ -47,20 +46,20 @@ C:\Users\HP PRO BOOK\Desktop\FRONTEND\PROYECTOS\Consejo-de-Barrio
 |  |  ├── supabaseClient.js
 |  |  └── useUsuarios.js
 |  ├── main.jsx
-|  ├── pages
-|  |  ├── Actividades.jsx
-|  |  ├── Calendario.jsx
-|  |  ├── Compromisos.jsx
-|  |  ├── Dashboard.jsx
-|  |  ├── Login.jsx
-|  |  ├── Organizaciones.jsx
-|  |  ├── Perfil.jsx
-|  |  ├── ReunionDetalle.jsx
-|  |  ├── Reuniones.jsx
-|  |  ├── ReunionObispado.jsx
-|  |  └── SendaConvenios.jsx
-|  └── {components,pages,layouts,lib}
+|  └── pages
+|     ├── Actividades.jsx
+|     ├── Calendario.jsx
+|     ├── Compromisos.jsx
+|     ├── Dashboard.jsx
+|     ├── Discursantes.jsx
+|     ├── Login.jsx
+|     ├── Organizaciones.jsx
+|     ├── Perfil.jsx
+|     ├── ReunionDetalle.jsx
+|     ├── Reuniones.jsx
+|     ├── ReunionObispado.jsx
+|     └── SendaConvenios.jsx
 └── vite.config.js
 
-directory: 13 file: 49 symboliclink: 9
+directory: 12 file: 49 symboliclink: 9
 
