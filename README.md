@@ -1,165 +1,84 @@
-Consejo de Barrio — App
+🛡️ Consejo de Barrio | Barrio Cerro Moreno
+Plataforma web de deliberación, ministración, control de entrevistas y gestión unificada para el liderazgo del Barrio Cerro Moreno (Estaca La Portada).
 
-Plataforma web (PWA) para la gestión de consejos y reuniones de liderazgo de una organización eclesiástica: agendas, actas confidenciales, seguimiento de compromisos y control de asignaciones, con acceso restringido por roles.
+🚀 Arquitectura y Tecnologías
+El proyecto está desarrollado bajo una arquitectura moderna de SPA (Single Page Application) optimizada para alto rendimiento, seguridad y responsividad:
 
-Demo: consejo-de-barrio-jet.vercel.app
+Frontend: React 18, Vite, Tailwind CSS (v4) y Lucide React (iconos vectoriales).
 
-El problema
+Enrutamiento: React Router DOM (con control de rutas protegidas y guardianes de rol).
 
-La coordinación de un consejo de barrio y de las reuniones de obispado se hacía con documentos sueltos y mensajes: actas dispersas, compromisos sin seguimiento y discursos repetidos en fechas cercanas. Esta app centraliza todo en un solo lugar y protege la información sensible según el rol de cada usuario.
+Backend y Base de Datos: Supabase (Autenticación por roles y base de datos relacional PostgreSQL con políticas RLS).
 
-Funcionalidades
-Tablero general del consejo con el resumen de reuniones y compromisos.
-Agendas estructuradas: 7 secciones para el Consejo de Barrio y 8 para la reunión de Obispado.
-Actas confidenciales: acceso exclusivo para obispado y secretarios.
-Kanban de compromisos ministeriales con estados y responsables.
-Senda de Convenios: checklist flexible para el seguimiento de nuevos conversos y miembros reactivados.
-Control de discursos sacramentales con alertas automáticas de repetición.
-Planificador de actividades y calendario general.
-Informes ejecutivos en PDF generados desde las actas.
-Instalable como PWA en el celular y diseño responsive.
+Despliegue y Hosting: Vercel (con redirección forzada a HTTPS y certificados SSL automáticos).
 
-Stack tecnológico
-Área	Tecnología
-Frontend	React (Vite)
-Estilos	Tailwind CSS v4
-Backend como servicio	Supabase (Auth + PostgreSQL)
-Seguridad	Row Level Security (RLS)
-Íconos	Lucide Icons
-PDF	[librería usada para generar los PDF]
-Gestor de paquetes	pnpm
-Despliegue	Vercel
+📂 Estructura del Proyecto
 
-Seguridad y control de acceso
-
-El acceso se controla en dos capas:
-
-Interfaz: RutaProtegidaObispado oculta las rutas que el rol no puede ver.
-Base de datos: las políticas RLS de Supabase impiden que un usuario sin permisos lea información restringida, incluso consultando la API directamente.
-
-Autenticación con Supabase Auth y sesión persistente.
-
-Ruta	Página	Acceso
-/login	Inicio de sesión	Público
-/	Dashboard	Autenticado
-/reuniones	Lista de reuniones	Autenticado
-/reuniones/:id	Agenda Consejo de Barrio	Autenticado
-/reuniones/obispado/:id?	Agenda de Obispado	Solo obispado y secretarios
-/compromisos	Kanban de asignaciones	Autenticado
-/senda-convenios	Seguimiento de miembros	Autenticado
-/actividades	Planificación de actividades	Autenticado
-/calendario	Calendario general	Autenticado
-
-Modelo de datos
-
-11 tablas relacionales en PostgreSQL: usuarios, reuniones, reunion_participantes, agenda_items, asignaciones, miembros_seguimiento, checklist_senda_convenios, miembro_checklist_progreso, actividades, organizaciones y calendario_eventos.
-
-Estructura del proyecto
-src/
-  components/        Componentes compartidos (Sidebar, TopBar, BottomNav, ui.jsx)
-  layouts/
-    AppLayout.jsx    Layout con sidebar + topbar + bottomnav
-  lib/
-    AuthContext.jsx  Sesión y rol del usuario (Supabase Auth)
-    navigation.js    Fuente única de verdad del menú
-    supabaseClient.js Cliente de Supabase
-  pages/
-    Login.jsx
-    Dashboard.jsx
-    Reuniones.jsx
-    ReunionDetalle.jsx
-    ReunionObispado.jsx
-    Compromisos.jsx
-    SendaConvenios.jsx
-    Actividades.jsx
-    Calendario.jsx
-
-Estructura del proyecto
-
-    ├── eslint.config.js
-├── index.html
-├── node_modules
-|  ├── @supabase
-|  ├── @tailwindcss
-|  ├── @vitejs
+Consejo-de-Barrio/
+├── public/
+│   ├── favicon.svg
+│   ├── og-cover.png
+│   └── robots.txt
+├── src/
+│   ├── components/
+│   │   ├── modals/         # Modales de reasignación y detalle de tareas
+│   │   ├── BottomNav.jsx   # Barra de navegación inferior móvil
+│   │   ├── MobileDrawer.jsx# Menú de hamburguesa y cajón lateral móvil
+│   │   ├── ProtectedRoute.jsx # Guardián de sesión activa
+│   │   ├── RutaProtegidaObispado.jsx # Guardián de roles de obispado
+│   │   ├── Sidebar.jsx     # Barra lateral de escritorio con submenús
+│   │   └── TopBar.jsx      # Barra superior con notificaciones y perfil
+│   ├── layouts/
+│   │   └── AppLayout.jsx   # Layout principal unificado
+│   ├── lib/
+│   │   ├── AuthContext.jsx # Proveedor de contexto y autenticación Supabase
+│   │   ├── AsignacionesContext.jsx # Proveedor de tareas y compromisos
+│   │   ├── navigation.js   # Configuración central de rutas y permisos
+│   │   └── supabaseClient.js # Cliente de conexión a Supabase
+│   ├── pages/
+│   │   ├── Actividades.jsx
+│   │   ├── Calendario.jsx
+│   │   ├── Compromisos.jsx
+│   │   ├── Dashboard.jsx   # Tablero general con KPIs y gráficos de progreso
+│   │   ├── Discursantes.jsx
+│   │   ├── EntrevistasObispado.jsx # Control de entrevistas y recomendación de templo
+│   │   ├── Login.jsx       # Vista de acceso seguro institucional
+│   │   ├── NotFound.jsx    # Página 404 personalizada
+│   │   ├── Organizaciones.jsx
+│   │   ├── Perfil.jsx
+│   │   ├── ReunionDetalle.jsx
+│   │   ├── ReunionObispado.jsx
+│   │   └── Reuniones.jsx   # Gestión de actas e informes en PDF
+│   ├── App.jsx             # Enrutador principal de la aplicación
+│   ├── index.css           # Estilos globales y directivas de Tailwind
+│   └── main.jsx            # Punto de entrada de React
+├── index.html              # Metadatos SEO y Open Graph
 ├── package.json
-├── pnpm-lock.yaml
-├── pnpm-workspace.yaml
-├── public
-|  ├── favicon.svg
-|  └── icons.svg
-├── README.md
-├── src
-|  ├── App.jsx
-|  ├── assets
-|  |  ├── hero.png
-|  |  ├── react.svg
-|  |  └── vite.svg
-|  ├── components
-|  |  ├── BottomNav.jsx
-|  |  ├── MobileDrawer.jsx
-|  |  ├── Modal.jsx
-|  |  ├── modals
-|  |  |  ├── AgendarReunionCalendarioModal.jsx
-|  |  |  ├── DetalleAsignacionModal.jsx
-|  |  |  ├── EditarHitoModal.jsx
-|  |  |  ├── NuevaActividadModal.jsx
-|  |  |  ├── NuevaAsignacionModal.jsx
-|  |  |  ├── NuevaReunionModal.jsx
-|  |  |  ├── NuevoMiembroModal.jsx
-|  |  |  └── ReasignarModal.jsx
-|  |  ├── ProtectedRoute.jsx
-|  |  ├── RutaProtegidaObispado.jsx
-|  |  ├── Sidebar.jsx
-|  |  ├── TopBar.jsx
-|  |  └── ui.jsx
-|  ├── index.css
-|  ├── layouts
-|  |  └── AppLayout.jsx
-|  ├── lib
-|  |  ├── AsignacionesContext.jsx
-|  |  ├── AuthContext.jsx
-|  |  ├── navigation.js
-|  |  ├── supabaseClient.js
-|  |  └── useUsuarios.js
-|  ├── main.jsx
-|  └── pages
-|     ├── Actividades.jsx
-|     ├── Calendario.jsx
-|     ├── Compromisos.jsx
-|     ├── Dashboard.jsx
-|     ├── Discursantes.jsx
-|     ├── Login.jsx
-|     ├── Organizaciones.jsx
-|     ├── Perfil.jsx
-|     ├── ReunionDetalle.jsx
-|     ├── Reuniones.jsx
-|     ├── ReunionObispado.jsx
-|     └── SendaConvenios.jsx
 └── vite.config.js
 
-Cómo ejecutarlo en local
+⚙️ Configuración y Variables de Entorno
+Para levantar el proyecto en un entorno de desarrollo local, sigue estos pasos:
 
-Requisitos: Node.js v24.18.0 y pnpm.
-git clone https://github.com/jsantander-cl/consejo-de-barrio.git
-cd consejo-de-barrio
-pnpm install
-cp .env.example .env      # completa con las credenciales de tu proyecto Supabase
-pnpm dev
+1 Clona el repositorio e instala las dependencias:
+npm install
 
-Abre http://localhost:5173
+2 Crea un archivo .env en la raíz del proyecto y configura tus credenciales de Supabase:
+VITE_SUPABASE_URL=tu_url_de_supabase
+VITE_SUPABASE_ANON_KEY=tu_clave_anon_publica_de_supabase
 
-Las variables de entorno necesarias están listadas en .env.example. Nunca subas tu archivo .env al repositorio.
+3 Ejecuta el servidor de desarrollo local con Vite:
+npm run dev
 
-Acceso de prueba
+🔒 Seguridad y Control de Acceso
+Autenticación: Gestionada íntegramente mediante Supabase Auth con manejo seguro de sesiones por token almacenado en caché cifrada.
 
-[Si dejas un usuario de demostración, escríbelo aquí: correo y contraseña de una cuenta sin datos reales. Si no, elimina esta sección y apóyate en las capturas.]
+Control por Roles (ROLES_ACCESO_OBISPADO): Los accesos a secciones confidenciales como el Obispado, Agenda de Reuniones de Obispado y Control de Entrevistas están restringidos de forma estricta a los roles autorizados (obispo, consejero, sec_ejecutivo, sec_barrio).
 
-Decisiones técnicas
-Supabase para tener autenticación y base de datos relacional sin mantener un servidor propio.
-RLS en la base de datos para que la seguridad no dependa solo del frontend.
-Una única fuente de verdad para la navegación (navigation.js), de modo que menú y rutas no se desincronicen.
-Mobile-first, ya que los líderes la usan principalmente desde el celular.
-Autor
+Privacidad de Indexación: Configurado con un archivo robots.txt restrictivo (Disallow: /) y metatiquetas noindex, nofollow para proteger los datos eclesiásticos y el padrón de miembros frente a motores de búsqueda públicos.
 
-Jordan Santander — Frontend Developer Junior LinkedIn · GitHub
+📱 Características Destacadas
+Interfaz Responsiva Completa: Adaptación fluida entre escritorio y dispositivos móviles mediante un cajón lateral (MobileDrawer) que replica la estructura del menú del obispado.
+
+Indicadores de Carga Asíncrona: Implementación de componentes visuales con spinners (Loader2) optimizados para evitar saltos de contenido durante las consultas a Supabase.
+
+Gestión de Padrón y Senda de Convenios: Seguimiento estructurado del progreso de los miembros y compromisos asignados por organización auxiliar.

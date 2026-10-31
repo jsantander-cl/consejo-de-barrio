@@ -21,6 +21,7 @@ import Actividades from './pages/Actividades.jsx'
 import Calendario from './pages/Calendario.jsx'
 import Organizaciones from './pages/Organizaciones.jsx'
 import Perfil from './pages/Perfil.jsx'
+import NotFound from './pages/NotFound.jsx' // 1. Importar la vista 404
 
 export default function App() {
   return (
@@ -76,8 +77,8 @@ export default function App() {
             </Route>
           </Route>
 
-          {/* 3. Redirección por defecto si la URL no existe */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* 3. Página 404 personalizada si la URL no existe */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AsignacionesProvider>
     </AuthProvider>

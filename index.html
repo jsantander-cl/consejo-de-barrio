@@ -1,11 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es" class="h-full">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Consejo de Barrio</title>
+    
+    <!-- Metatítulos y descripción -->
+    <title>Consejo de Barrio | Barrio Cerro Moreno - Estaca La Portada</title>
+    <meta name="description" content="Plataforma de deliberación, ministración, control de entrevistas y gestión unificada del Consejo de Barrio Cerro Moreno." />
+
+    <!-- Open Graph / Social Cards (Para previsualización en WhatsApp / Redes Sociales) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Consejo de Barrio | Barrio Cerro Moreno" />
+    <meta property="og:description" content="Plataforma de deliberación y ministración del Barrio Cerro Moreno." />
+    <meta property="og:image" content="/og-cover.png" /> <!-- Asegúrate de tener una imagen de portada o logotipo en public/og-cover.png si deseas -->
+
+    <!-- Robots: Bloquear indexación pública por privacidad de los datos eclesiásticos -->
+    <meta name="robots" content="noindex, nofollow" />
   </head>
-  <body class="h-full bg-background text-on-surface antialiased">
+  <body class="h-full bg-surface text-on-surface antialiased">
     <div id="root" class="h-full"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
