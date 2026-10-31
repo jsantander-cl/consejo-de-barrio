@@ -436,7 +436,7 @@ export default function EntrevistasObispado() {
                       >
                         <span className="text-primary">{m.nombre}</span>
                         <span className="text-[10px] bg-surface-container px-2 py-0.5 rounded text-on-surface-variant">
-                          {m.tipo_recomendacion || 'Miembro'} {m.vencimiento ? `(Vence: ${m.vencimiento})` : ''}
+                          {m.tipo_recomendacion || 'Miembro'}
                         </span>
                       </button>
                     ))}
