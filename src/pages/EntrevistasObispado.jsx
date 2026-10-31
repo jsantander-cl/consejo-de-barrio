@@ -471,7 +471,7 @@ export default function EntrevistasObispado() {
                     onChange={(e) => setForm({ ...form, asignado_a: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-outline-variant/60 text-sm focus:ring-2 focus:ring-primary cursor-pointer"
                   >
-                    <option value="Obispo" className="bg-white">Obispo (Jordan Santander)</option>
+                    <option value="Obispo" className="bg-white">Obispo</option>
                     <option value="1er Consejero" className="bg-white">1er Consejero</option>
                     <option value="2do Consejero" className="bg-white">2do Consejero</option>
                   </select>
