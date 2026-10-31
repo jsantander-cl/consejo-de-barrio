@@ -1,9 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from './supabaseClient.js'
 
-// Roles definidos en el modelo de datos: obispo, consejero, sec_ejecutivo,
-// sec_barrio, lider_organizacion, invitado.
-// Estos cuatro roles son los ÚNICOS con acceso a reuniones tipo "obispado".
 export const ROLES_ACCESO_OBISPADO = ['obispo', 'consejero', 'sec_ejecutivo', 'sec_barrio']
 
 const AuthContext = createContext(null)
@@ -13,7 +10,10 @@ export function AuthProvider({ children }) {
   const [cargando, setCargando] = useState(true)
 
   async function cargarPerfil(authUser) {
-    if (!authUser) { setUser(null); return }
+    if (!authUser) { 
+      setUser(null)
+      return 
+    }
     const { data } = await supabase
       .from('usuarios')
       .select('id, nombre, rol, organizacion_id, organizaciones ( nombre )')
@@ -32,16 +32,36 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  // 1. Agregamos la función signOut antes del return para cerrar sesión en Supabase
+  // Función signIn mejorada que fuerza la espera de la sesión
+  async function signIn(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) throw error
+    
+    // Forzamos a que el contexto verifique inmediatamente la sesión activa
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (sessionData?.session?.user) {
+      await cargarPerfil(sessionData.session.user)
+    }
+    return data
+  }
+
   async function signOut() {
     await supabase.auth.signOut()
+    setUser(null)
   }
 
   const puedeVerReunionesObispado = user ? ROLES_ACCESO_OBISPADO.includes(user.rol) : false
 
-  // 2. Agregamos 'signOut' al value del AuthContext.Provider
+  if (cargando) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-surface-container-low">
+        <p className="text-sm font-medium text-on-surface-variant animate-pulse">Cargando sesión de Barrio Cerro Moreno...</p>
+      </div>
+    )
+  }
+
   return (
-    <AuthContext.Provider value={{ user, cargando, puedeVerReunionesObispado, signOut }}>
+    <AuthContext.Provider value={{ user, cargando, puedeVerReunionesObispado, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   )

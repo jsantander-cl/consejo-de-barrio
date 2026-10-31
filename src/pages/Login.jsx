@@ -1,21 +1,30 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Key, Eye, EyeOff, Lock, ArrowRight, ShieldCheck } from 'lucide-react'
-import { supabase } from '../lib/supabaseClient.js'
+import { useAuth } from '../lib/AuthContext.jsx' // Asegúrate de importar el hook useAuth
 
 export default function Login() {
   const navigate = useNavigate()
+  const { signIn } = useAuth() // Usamos signIn directamente del contexto
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError(error.message); return }
-    navigate('/')
+    setLoading(true)
+
+    try {
+      // Espera a que el contexto valide y cargue la sesión y el perfil de usuario
+      await signIn(email, password)
+      navigate('/', { replace: true })
+    } catch (err) {
+      setError(err.message || 'Correo o contraseña incorrectos.')
+      setLoading(false)
+    }
   }
 
   return (
@@ -103,10 +112,11 @@ export default function Login() {
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-medium shadow-sm active:scale-[0.99] transition-all"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-medium shadow-sm active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
               >
-                Iniciar sesión
-                <ArrowRight size={18} />
+                {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+                {!loading && <ArrowRight size={18} />}
               </button>
             </form>
           </div>

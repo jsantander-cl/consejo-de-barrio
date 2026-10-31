@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { CheckCircle2, AlertTriangle, UserSearch, CalendarDays, Lock, ArrowRight } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, UserSearch, CalendarDays, Lock, ArrowRight, Loader2 } from 'lucide-react'
 import { KpiCard, Card, StatusBadge } from '../components/ui.jsx'
 import { useState, useEffect } from 'react'
 import { useAsignaciones } from '../lib/AsignacionesContext.jsx'
@@ -12,6 +12,9 @@ export default function Dashboard() {
   const [asignacionAReasignar, setAsignacionAReasignar] = useState(null)
   const [tareaDetalle, setTareaDetalle] = useState(null)
   
+  // Estado para controlar la carga inicial de Supabase en el tablero
+  const [cargandoTablero, setCargandoTablero] = useState(true)
+
   // Estados para métricas dinámicas
   const [miembrosSeguimientoCount, setMiembrosSeguimientoCount] = useState(0)
   const [proximaReunion, setProximaReunion] = useState(null)
@@ -21,6 +24,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function cargarDatosDashboard() {
+      setCargandoTablero(true)
+      
       // 1. Total de miembros en seguimiento
       const { data: miembrosData, count: totalMiembros } = await supabase
         .from('miembros_seguimiento')
@@ -82,10 +87,8 @@ export default function Dashboard() {
       if (miembrosData && miembrosData.length > 0) {
         miembrosData.forEach((m) => {
           const checklist = m.miembro_checklist_progreso || []
-          const hitosAplica = checklist.filter(h => h.aplica)
           const hitosCompletados = checklist.filter(h => h.estado === 'completado' || h.estado === 'cumplido').length
           
-          // Clasificación según cantidad de hitos completados
           if (hitosCompletados <= 2) {
             buckets.contacto++
           } else if (hitosCompletados <= 4) {
@@ -184,6 +187,8 @@ export default function Dashboard() {
 
         setCompromisosOrg(desglose)
       }
+
+      setCargandoTablero(false)
     }
 
     cargarDatosDashboard()
@@ -216,7 +221,7 @@ export default function Dashboard() {
     { 
       icon: CalendarDays, 
       label: 'Próxima reunión general', 
-      value: proximaReunion?.fechaTexto || 'Cargando...', 
+      value: cargandoTablero ? 'Cargando...' : (proximaReunion?.fechaTexto || 'Cargando...'), 
       hint: proximaReunion?.titulo || 'Consejo de Barrio' 
     },
   ]
@@ -244,7 +249,7 @@ export default function Dashboard() {
                 <StatusBadge status="info">Confidencial</StatusBadge>
               </div>
               <h2 className="text-base font-semibold text-on-surface mt-0.5">
-                Próxima reunión de obispado: {proximaReunion?.fechaTexto || 'Por agendar'}
+                Próxima reunión de obispado: {cargandoTablero ? 'Cargando...' : (proximaReunion?.fechaTexto || 'Por agendar')}
               </h2>
             </div>
           </div>
@@ -262,139 +267,149 @@ export default function Dashboard() {
         {KPIS_DINAMICOS.map((kpi) => <KpiCard key={kpi.label} {...kpi} />)}
       </section>
 
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Compromisos por Organización */}
-        <Card
-          title="Compromisos por organización"
-          subtitle="Balance de cumplimiento asignado en el consejo"
-          className="lg:col-span-7"
-        >
-          <div className="space-y-4">
-            {compromisosOrg.length === 0 ? (
-              <p className="text-sm text-on-surface-variant">No hay organizaciones con tareas activas registradas.</p>
-            ) : (
-              compromisosOrg.map((o) => (
-                <div key={o.org} className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-medium text-on-surface">{o.org}</span>
-                    <span className="text-xs text-on-surface-variant">{o.total} tareas · {o.cumplido}% cumplido</span>
-                  </div>
-                  <div className="h-3 w-full bg-surface-container rounded-full overflow-hidden flex">
-                    <div className="bg-rose-800 h-full" style={{ width: `${o.vencida}%` }} />
-                    <div className="bg-gray-600 h-full" style={{ width: `${o.pendiente}%` }} />
-                    <div className="bg-yellow-400 h-full" style={{ width: `${o.proceso}%` }} />
-                    <div className="bg-emerald-800 h-full" style={{ width: `${o.cumplido}%` }} />
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </Card>
-
-        {/* Progreso senda de convenios basado en Hitos Reales */}
-        <Card
-          title="Progreso senda de convenios"
-          subtitle="Distribución de miembros en acompañamiento"
-          action={
-            <Link to="/senda-convenios" className="text-xs text-primary font-semibold hover:underline">
-              Ver seguimiento
-            </Link>
-          }
-          className="lg:col-span-5"
-        >
-          <div className="flex flex-col gap-3">
-            {senda.map((s) => (
-              <div key={s.label} className="flex items-center justify-between gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className={`w-3 h-3 rounded-sm ${s.color}`} />
-                  <span className="text-on-surface font-medium">{s.label}</span>
-                </div>
-                <span className="font-bold text-primary">{s.count} ({s.pct}%)</span>
+      {/* PANTALLA DE CARGA CON SPINNER SI SUPABASE ESTÁ CONSULTANDO */}
+      {cargandoTablero ? (
+        <div className="flex flex-col items-center justify-center p-16 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 space-y-3 shadow-2xs">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-xs font-semibold text-on-surface-variant tracking-wide">Sincronizando información del Consejo y compromisos...</p>
+        </div>
+      ) : (
+        <>
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Compromisos por Organización */}
+            <Card
+              title="Compromisos por organización"
+              subtitle="Balance de cumplimiento asignado en el consejo"
+              className="lg:col-span-7"
+            >
+              <div className="space-y-4">
+                {compromisosOrg.length === 0 ? (
+                  <p className="text-sm text-on-surface-variant">No hay organizaciones con tareas activas registradas.</p>
+                ) : (
+                  compromisosOrg.map((o) => (
+                    <div key={o.org} className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium text-on-surface">{o.org}</span>
+                        <span className="text-xs text-on-surface-variant">{o.total} tareas · {o.cumplido}% cumplido</span>
+                      </div>
+                      <div className="h-3 w-full bg-surface-container rounded-full overflow-hidden flex">
+                        <div className="bg-rose-800 h-full" style={{ width: `${o.vencida}%` }} />
+                        <div className="bg-gray-600 h-full" style={{ width: `${o.pendiente}%` }} />
+                        <div className="bg-yellow-400 h-full" style={{ width: `${o.proceso}%` }} />
+                        <div className="bg-emerald-800 h-full" style={{ width: `${o.cumplido}%` }} />
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-            ))}
-          </div>
-        </Card>
-      </section>
+            </Card>
 
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Tarjeta Próximas Actividades Dinámica */}
-        <Card 
-          title="Próximas actividades" 
-          action={<Link to="/calendario" className="text-xs text-primary font-semibold hover:underline">Ver calendario</Link>}
-        >
-          <div className="space-y-2">
-            {proximasActividades.length === 0 ? (
-              <p className="text-sm text-on-surface-variant">No hay actividades agendadas próximamente.</p>
-            ) : (
-              proximasActividades.map((a) => {
-                const fechaObj = new Date(a.fecha)
-                const diaNombre = fechaObj.toLocaleDateString('es-ES', { weekday: 'short' }).toUpperCase().replace('.', '')
-                const diaNum = fechaObj.getDate()
-                const horaTexto = fechaObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-
-                return (
-                  <div key={a.id} className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-surface-container-highest/70 flex flex-col items-center justify-center shrink-0 text-primary">
-                      <span className="text-[10px] font-bold uppercase text-on-surface-variant">{diaNombre}</span>
-                      <span className="text-lg font-bold leading-tight">{diaNum}</span>
+            {/* Progreso senda de convenios basado en Hitos Reales */}
+            <Card
+              title="Progreso senda de convenios"
+              subtitle="Distribución de miembros en acompañamiento"
+              action={
+                <Link to="/senda-convenios" className="text-xs text-primary font-semibold hover:underline">
+                  Ver seguimiento
+                </Link>
+              }
+              className="lg:col-span-5"
+            >
+              <div className="flex flex-col gap-3">
+                {senda.map((s) => (
+                  <div key={s.label} className="flex items-center justify-between gap-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-3 h-3 rounded-sm ${s.color}`} />
+                      <span className="text-on-surface font-medium">{s.label}</span>
                     </div>
-                    <div className="min-w-0">
-                      <span className="text-xs font-medium text-secondary block">{a.organizacion || 'Barrio'}</span>
-                      <h4 className="text-sm font-semibold text-primary truncate">{a.titulo}</h4>
-                      <p className="text-xs text-on-surface-variant mt-0.5">
-                        {horaTexto} hrs {a.lugar ? `· ${a.lugar}` : ''}
-                      </p>
-                    </div>
+                    <span className="font-bold text-primary">{s.count} ({s.pct}%)</span>
                   </div>
-                )
-              })
-            )}
-          </div>
-        </Card>
+                ))}
+              </div>
+            </Card>
+          </section>
 
-        {/* Asignaciones Vencidas Críticas */}
-        <Card
-          title="Asignaciones vencidas críticas"
-          action={<StatusBadge status="danger">{vencidas.length} pendientes</StatusBadge>}
-        >
-          <div className="space-y-3">
-            {vencidas.length === 0 && (
-              <p className="text-sm text-on-surface-variant">No hay asignaciones vencidas. 🎉</p>
-            )}
-            {vencidas.map((v) => {
-              const tituloLimpio = v.descripcion ? v.descripcion.split(' --- ')[0] : ''
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Tarjeta Próximas Actividades Dinámica */}
+            <Card 
+              title="Próximas actividades" 
+              action={<Link to="/calendario" className="text-xs text-primary font-semibold hover:underline">Ver calendario</Link>}
+            >
+              <div className="space-y-2">
+                {proximasActividades.length === 0 ? (
+                  <p className="text-sm text-on-surface-variant">No hay actividades agendadas próximamente.</p>
+                ) : (
+                  proximasActividades.map((a) => {
+                    const fechaObj = new Date(a.fecha)
+                    const diaNombre = fechaObj.toLocaleDateString('es-ES', { weekday: 'short' }).toUpperCase().replace('.', '')
+                    const diaNum = fechaObj.getDate()
+                    const horaTexto = fechaObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
 
-              return (
-                <div key={v.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-outline-variant/15 first:border-0 first:pt-0">
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-sm font-semibold text-primary">{tituloLimpio}</h4>
-                      <StatusBadge status="danger">Vence: {v.fecha_limite}</StatusBadge>
+                    return (
+                      <div key={a.id} className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 flex items-start gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-surface-container-highest/70 flex flex-col items-center justify-center shrink-0 text-primary">
+                          <span className="text-[10px] font-bold uppercase text-on-surface-variant">{diaNombre}</span>
+                          <span className="text-lg font-bold leading-tight">{diaNum}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-medium text-secondary block">{a.organizacion || 'Barrio'}</span>
+                          <h4 className="text-sm font-semibold text-primary truncate">{a.titulo}</h4>
+                          <p className="text-xs text-on-surface-variant mt-0.5">
+                            {horaTexto} hrs {a.lugar ? `· ${a.lugar}` : ''}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+            </Card>
+
+            {/* Asignaciones Vencidas Críticas */}
+            <Card
+              title="Asignaciones vencidas críticas"
+              action={<StatusBadge status="danger">{vencidas.length} pendientes</StatusBadge>}
+            >
+              <div className="space-y-3">
+                {vencidas.length === 0 && (
+                  <p className="text-sm text-on-surface-variant">No hay asignaciones vencidas. 🎉</p>
+                )}
+                {vencidas.map((v) => {
+                  const tituloLimpio = v.descripcion ? v.descripcion.split(' --- ')[0] : ''
+
+                  return (
+                    <div key={v.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-outline-variant/15 first:border-0 first:pt-0">
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-sm font-semibold text-primary">{tituloLimpio}</h4>
+                          <StatusBadge status="danger">Vence: {v.fecha_limite}</StatusBadge>
+                        </div>
+                        <p className="text-xs text-on-surface-variant mt-0.5">
+                          {v.usuarios?.nombre} {v.usuarios?.organizaciones?.nombre ? `· ${v.usuarios.organizaciones.nombre}` : ''}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button 
+                          onClick={() => setTareaDetalle(v)}
+                          className="px-3 py-1.5 rounded-lg border border-outline-variant/60 hover:bg-surface-container text-xs font-medium text-primary transition-colors cursor-pointer"
+                        >
+                          Ver
+                        </button>
+                        <button
+                          onClick={() => setAsignacionAReasignar(v)}
+                          className="px-3 py-1.5 rounded-lg border border-outline-variant/60 hover:bg-surface-container text-xs font-medium text-on-surface transition-colors cursor-pointer"
+                        >
+                          Reasignar
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-xs text-on-surface-variant mt-0.5">
-                      {v.usuarios?.nombre} {v.usuarios?.organizaciones?.nombre ? `· ${v.usuarios.organizaciones.nombre}` : ''}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button 
-                      onClick={() => setTareaDetalle(v)}
-                      className="px-3 py-1.5 rounded-lg border border-outline-variant/60 hover:bg-surface-container text-xs font-medium text-primary transition-colors"
-                    >
-                      Ver
-                    </button>
-                    <button
-                      onClick={() => setAsignacionAReasignar(v)}
-                      className="px-3 py-1.5 rounded-lg border border-outline-variant/60 hover:bg-surface-container text-xs font-medium text-on-surface transition-colors"
-                    >
-                      Reasignar
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </Card>
-      </section>
+                  )
+                })}
+              </div>
+            </Card>
+          </section>
+        </>
+      )}
 
       <ReasignarModal
         asignacion={asignacionAReasignar}
