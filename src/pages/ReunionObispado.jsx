@@ -119,7 +119,7 @@ export default function ReunionObispado() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <button
-          onClick={() => navigate('/reuniones')}
+          onClick={() => navigate('/reuniones/obispado')}
           className="inline-flex items-center gap-2 text-xs font-bold text-primary hover:underline bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/30"
         >
           <ArrowLeft size={16} /> Volver al Calendario

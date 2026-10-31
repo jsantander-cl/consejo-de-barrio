@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { PanelLeftClose, PanelLeftOpen, LogOut, Lock, ChevronDown, Calendar, UserCheck } from 'lucide-react'
+import { PanelLeftClose, PanelLeftOpen, LogOut, Lock, ChevronDown, UserCheck, Calendar, CalendarClock } from 'lucide-react'
 import { NAV_ITEMS } from '../lib/navigation.js'
 import { useAuth } from '../lib/AuthContext.jsx'
 
@@ -21,13 +21,18 @@ export default function Sidebar({ collapsed, onToggleCollapsed }) {
     navigate('/login')
   }
 
-  // Verificamos si alguna sub-ruta de obispado está activa para iluminar el botón principal
+  // Verificamos rutas de forma independiente y estricta
   const esObispadoActivo = location.pathname.includes('/obispado') || location.pathname.includes('/reuniones/obispado')
+  const esConsejoBarrioActivo = location.pathname === '/reuniones'
 
-  // Filtramos NAV_ITEMS para excluir cualquier ruta de obispado y evitar duplicados
-  const itemsFiltrados = NAV_ITEMS.filter(
-    item => !item.to.includes('obispado') && !item.restringido
+  // Filtramos NAV_ITEMS excluyendo Tablero General (índice 0), Obispado, Consejo de Barrio y restricciones
+  const itemsSecundarios = NAV_ITEMS.slice(1).filter(
+    item => !item.to.includes('obispado') && item.to !== '/reuniones' && !item.restringido
   )
+
+  // Buscamos el icono original de Consejo de Barrio desde NAV_ITEMS si existe, o usamos un respaldo con reloj
+  const itemConsejoOriginal = NAV_ITEMS.find(item => item.to === '/reuniones')
+  const IconoConsejo = itemConsejoOriginal ? itemConsejoOriginal.icon : CalendarClock
 
   return (
     <aside
@@ -63,8 +68,8 @@ export default function Sidebar({ collapsed, onToggleCollapsed }) {
         </div>
 
         <nav className="flex flex-col gap-1">
-          {/* 1. Primer elemento: Tablero General */}
-          {itemsFiltrados.slice(0, 1).map((item) => (
+          {/* 1. PRIMER ELEMENTO: Tablero General (Inicio /) */}
+          {NAV_ITEMS.slice(0, 1).map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -85,13 +90,13 @@ export default function Sidebar({ collapsed, onToggleCollapsed }) {
             </NavLink>
           ))}
 
-          {/* 2. SEGUNDA POSICIÓN: Menú desplegable independiente de Obispado */}
+          {/* 2. SEGUNDO ELEMENTO: Menú desplegable independiente de Obispado */}
           {puedeVerReunionesObispado && (
             <div className="flex flex-col mt-0.5">
               <button
                 onClick={() => setObispadoAbierto(!obispadoAbierto)}
                 title={collapsed ? 'Obispado' : undefined}
-                className={`flex items-center justify-between px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full ${
+                className={`flex items-center justify-between px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full cursor-pointer ${
                   collapsed ? 'justify-center px-2' : ''
                 } ${
                   esObispadoActivo
@@ -146,8 +151,24 @@ export default function Sidebar({ collapsed, onToggleCollapsed }) {
             </div>
           )}
 
-          {/* 3. Resto de elementos a partir de la tercera posición */}
-          {itemsFiltrados.slice(1).map((item) => (
+          {/* 3. TERCER ELEMENTO: Consejo de Barrio con su icono original del relojito */}
+          <NavLink
+            to="/reuniones"
+            title={collapsed ? "Consejo de Barrio" : undefined}
+            className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              collapsed ? 'justify-center px-2' : ''
+            } ${
+              esConsejoBarrioActivo
+                ? 'bg-secondary-container text-on-secondary-container font-bold'
+                : 'text-on-surface-variant hover:bg-surface-container'
+            }`}
+          >
+            <IconoConsejo size={20} />
+            {!collapsed && <span>Consejo de Barrio</span>}
+          </NavLink>
+
+          {/* 4. Resto de elementos del menú general (Compromisos, Senda de Convenios, etc.) */}
+          {itemsSecundarios.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

@@ -12,7 +12,8 @@ import Login from './pages/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Reuniones from './pages/Reuniones.jsx'
 import ReunionDetalle from './pages/ReunionDetalle.jsx'
-import ReunionObispado from './pages/ReunionObispado.jsx'
+import AgendaObispado from './pages/AgendaObispado.jsx' // Listado de obispado (img1)
+import ReunionObispado from './pages/ReunionObispado.jsx' // Detalle con los 8 puntos confidenciales (img2)
 import EntrevistasObispado from './pages/EntrevistasObispado.jsx'
 import Discursantes from './pages/Discursantes.jsx'
 import Compromisos from './pages/Compromisos.jsx'
@@ -21,7 +22,7 @@ import Actividades from './pages/Actividades.jsx'
 import Calendario from './pages/Calendario.jsx'
 import Organizaciones from './pages/Organizaciones.jsx'
 import Perfil from './pages/Perfil.jsx'
-import NotFound from './pages/NotFound.jsx' // 1. Importar la vista 404
+import NotFound from './pages/NotFound.jsx'
 
 export default function App() {
   return (
@@ -31,16 +32,26 @@ export default function App() {
           {/* 1. Ruta pública de acceso */}
           <Route path="/login" element={<Login />} />
 
-          {/* 2. Guardián General: Requiere sesión activa para ingresar a cualquier layout o subruta */}
+          {/* 2. Guardián General: Requiere sesión activa */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/reuniones" element={<Reuniones />} />
               <Route path="/reuniones/:id" element={<ReunionDetalle />} />
 
-              {/* Guardián Específico: Además de estar logueado, requiere rol de Obispado */}
+              {/* Listado de la Agenda de Obispado (Muestra el diseño de la imagen 1) */}
               <Route
-                path="/reuniones/obispado/:id?"
+                path="/reuniones/obispado"
+                element={
+                  <RutaProtegidaObispado>
+                    <AgendaObispado />
+                  </RutaProtegidaObispado>
+                }
+              />
+
+              {/* Detalle individual de la agenda de obispado (Muestra los 8 puntos de la imagen 2) */}
+              <Route
+                path="/reuniones/obispado/:id"
                 element={
                   <RutaProtegidaObispado>
                     <ReunionObispado />
@@ -77,7 +88,7 @@ export default function App() {
             </Route>
           </Route>
 
-          {/* 3. Página 404 personalizada si la URL no existe */}
+          {/* 3. Página 404 personalizada */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AsignacionesProvider>
