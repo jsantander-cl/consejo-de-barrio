@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import Reuniones from './pages/Reuniones.jsx'
 import ReunionDetalle from './pages/ReunionDetalle.jsx'
 import ReunionObispado from './pages/ReunionObispado.jsx'
+import EntrevistasObispado from './pages/EntrevistasObispado.jsx'
 import Discursantes from './pages/Discursantes.jsx'
 import Compromisos from './pages/Compromisos.jsx'
 import SendaConvenios from './pages/SendaConvenios.jsx'
@@ -42,6 +43,16 @@ export default function App() {
                 element={
                   <RutaProtegidaObispado>
                     <ReunionObispado />
+                  </RutaProtegidaObispado>
+                }
+              />
+
+              {/* Nueva Sección: Control de Entrevistas de Obispado */}
+              <Route
+                path="/obispado/entrevistas"
+                element={
+                  <RutaProtegidaObispado>
+                    <EntrevistasObispado />
                   </RutaProtegidaObispado>
                 }
               />
