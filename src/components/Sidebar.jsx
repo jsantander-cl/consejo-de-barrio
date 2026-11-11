@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { PanelLeftClose, PanelLeftOpen, LogOut, Lock, ChevronDown, UserCheck, Calendar, CalendarClock } from 'lucide-react'
+import { PanelLeftClose, PanelLeftOpen, LogOut, Lock, ChevronDown, UserCheck, Calendar, CalendarClock, Users } from 'lucide-react'
 import { NAV_ITEMS } from '../lib/navigation.js'
 import { useAuth } from '../lib/AuthContext.jsx'
 
@@ -131,6 +131,20 @@ export default function Sidebar({ collapsed, onToggleCollapsed }) {
                   >
                     <Calendar size={15} />
                     <span>Agenda de Obispado</span>
+                  </NavLink>
+
+                  <NavLink
+                    to="/obispado/sacramental"
+                    className={({ isActive }) =>
+                      `flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                        isActive
+                          ? 'bg-primary text-white shadow-2xs'
+                          : 'text-on-surface-variant hover:bg-surface-container'
+                      }`
+                    }
+                  >
+                    <Users size={15} />
+                    <span>Reunión Sacramental</span>
                   </NavLink>
 
                   <NavLink

@@ -12,8 +12,8 @@ import Login from './pages/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Reuniones from './pages/Reuniones.jsx'
 import ReunionDetalle from './pages/ReunionDetalle.jsx'
-import AgendaObispado from './pages/AgendaObispado.jsx' // Listado de obispado (img1)
-import ReunionObispado from './pages/ReunionObispado.jsx' // Detalle con los 8 puntos confidenciales (img2)
+import AgendaObispado from './pages/AgendaObispado.jsx' // Listado de obispado
+import ReunionObispado from './pages/ReunionObispado.jsx' // Detalle con los 8 puntos confidenciales
 import EntrevistasObispado from './pages/EntrevistasObispado.jsx'
 import Discursantes from './pages/Discursantes.jsx'
 import Compromisos from './pages/Compromisos.jsx'
@@ -39,7 +39,7 @@ export default function App() {
               <Route path="/reuniones" element={<Reuniones />} />
               <Route path="/reuniones/:id" element={<ReunionDetalle />} />
 
-              {/* Listado de la Agenda de Obispado (Muestra el diseño de la imagen 1) */}
+              {/* Listado de la Agenda de Obispado */}
               <Route
                 path="/reuniones/obispado"
                 element={
@@ -49,7 +49,7 @@ export default function App() {
                 }
               />
 
-              {/* Detalle individual de la agenda de obispado (Muestra los 8 puntos de la imagen 2) */}
+              {/* Detalle individual de la agenda de obispado */}
               <Route
                 path="/reuniones/obispado/:id"
                 element={
@@ -59,7 +59,17 @@ export default function App() {
                 }
               />
 
-              {/* Nueva Sección: Control de Entrevistas de Obispado */}
+              {/* Nueva Ruta: Reunión Sacramental (Gestión de Discursantes y Alerta de Repetición) */}
+              <Route
+                path="/obispado/sacramental"
+                element={
+                  <RutaProtegidaObispado>
+                    <Discursantes />
+                  </RutaProtegidaObispado>
+                }
+              />
+
+              {/* Sección: Control de Entrevistas de Obispado */}
               <Route
                 path="/obispado/entrevistas"
                 element={
@@ -69,7 +79,7 @@ export default function App() {
                 }
               />
 
-              {/* Gestión reservada de Discursantes */}
+              {/* Ruta heredada de respaldo para discursantes */}
               <Route
                 path="/discursantes"
                 element={
