@@ -92,6 +92,18 @@ export default function EntrevistasObispado() {
     cargarDatos(true)
   }
 
+  // Cambiar líder asignado directamente desde la tarjeta
+  const cambiarAsignado = async (id, nuevoAsignado) => {
+    setEntrevistas(prev => prev.map(item => item.id === id ? { ...item, asignado_a: nuevoAsignado } : item))
+
+    await supabase
+      .from('entrevistas_obispado')
+      .update({ asignado_a: nuevoAsignado })
+      .eq('id', id)
+    
+    cargarDatos(true)
+  }
+
   // Guardar notas o acuerdos confidenciales en la tarjeta
   const guardarNotaConfidencial = async (id) => {
     setEditandoNotaId(null)
@@ -109,7 +121,6 @@ export default function EntrevistasObispado() {
 
   const vencimientosMes = entrevistas.filter(item => {
     if (!item.fecha_vencimiento) return false
-    // Validamos si contiene el mes/año actual para la alerta
     return item.estado !== 'Realizada'
   })
 
@@ -117,6 +128,7 @@ export default function EntrevistasObispado() {
   const entrevistasFiltradas = entrevistas.filter(item => {
     if (filtroTipo === 'regular' && item.tipo_entrevista !== 'regular') return false
     if (filtroTipo === 'templo' && item.tipo_entrevista !== 'recomendacion_templo') return false
+    if (filtroTipo === 'ajuste_diezmo' && item.tipo_entrevista !== 'ajuste_diezmo') return false
     if (filtroLider !== 'todos' && item.asignado_a !== filtroLider) return false
     return true
   })
@@ -170,6 +182,18 @@ export default function EntrevistasObispado() {
     }
   }
 
+  // Etiqueta bonita para cada tipo de entrevista
+  const renderTipoBadge = (tipo) => {
+    switch (tipo) {
+      case 'recomendacion_templo':
+        return <StatusBadge status="info">Templo</StatusBadge>
+      case 'ajuste_diezmo':
+        return <StatusBadge status="warning">Ajuste de Diezmo</StatusBadge>
+      default:
+        return <StatusBadge status="success">Regular</StatusBadge>
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Encabezado */}
@@ -212,7 +236,7 @@ export default function EntrevistasObispado() {
                       <span className="text-xs font-bold text-primary block">{v.miembro_nombre}</span>
                       <span className="text-[11px] text-rose-700">Vence: {v.fecha_vencimiento}</span>
                     </div>
-                    <StatusBadge status="danger">{v.tipo_entrevista === 'recomendacion_templo' ? 'Templo' : 'Regular'}</StatusBadge>
+                    {renderTipoBadge(v.tipo_entrevista)}
                   </div>
                 ))}
               </div>
@@ -244,6 +268,12 @@ export default function EntrevistasObispado() {
             className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${filtroTipo === 'templo' ? 'bg-primary text-white shadow-xs' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'}`}
           >
             Recomendación Templo
+          </button>
+          <button
+            onClick={() => setFiltroTipo('ajuste_diezmo')}
+            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${filtroTipo === 'ajuste_diezmo' ? 'bg-primary text-white shadow-xs' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'}`}
+          >
+            Ajuste de Diezmo
           </button>
         </div>
 
@@ -277,13 +307,25 @@ export default function EntrevistasObispado() {
             <Card key={item.id} className="flex flex-col justify-between space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <StatusBadge status={item.tipo_entrevista === 'recomendacion_templo' ? 'info' : 'success'}>
-                    {item.tipo_entrevista === 'recomendacion_templo' ? 'Templo' : 'Regular'}
-                  </StatusBadge>
-                  <span className="text-xs font-bold text-secondary bg-secondary/10 px-2.5 py-1 rounded-md">
-                    {item.asignado_a}
-                  </span>
+                  {renderTipoBadge(item.tipo_entrevista)}
+
+                  {/* LÍDER ASIGNADO EDITABLE EN LA TARJETA (Se bloquea si está Realizada) */}
+                  <select
+                    value={item.asignado_a}
+                    disabled={estaRealizada}
+                    onChange={(e) => cambiarAsignado(item.id, e.target.value)}
+                    className={`text-xs font-bold px-2.5 py-1 rounded-md border transition-all ${
+                      estaRealizada
+                        ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                        : 'bg-slate-100 text-black border-slate-200 hover:bg-white cursor-pointer'
+                    }`}
+                  >
+                    <option value="Obispo">Obispo</option>
+                    <option value="1er Consejero">1er Consejero</option>
+                    <option value="2do Consejero">2do Consejero</option>
+                  </select>
                 </div>
+
                 <h3 className="font-bold text-primary text-base">{item.miembro_nombre}</h3>
                 {item.fecha_programada && (
                   <p className="text-xs text-on-surface-variant flex items-center gap-1.5">
@@ -413,7 +455,7 @@ export default function EntrevistasObispado() {
                   />
                 </div>
 
-                {/* Lista desplegable del Padrón con autocompletado de vencimiento (Mes y Año) */}
+                {/* Lista desplegable del Padrón */}
                 {mostrarSugerencias && miembrosSugeridos.length > 0 && (
                   <div className="absolute z-50 left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-outline-variant/30 max-h-48 overflow-y-auto">
                     {miembrosSugeridos.map(m => (
@@ -454,13 +496,14 @@ export default function EntrevistasObispado() {
                       setForm({ 
                         ...form, 
                         tipo_entrevista: nuevoTipo,
-                        fecha_vencimiento: nuevoTipo === 'regular' ? '' : form.fecha_vencimiento 
+                        fecha_vencimiento: nuevoTipo === 'recomendacion_templo' ? form.fecha_vencimiento : '' 
                       })
                     }}
                     className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-outline-variant/60 text-sm focus:ring-2 focus:ring-primary cursor-pointer"
                   >
-                    <option value="regular" className="bg-white">Regular (Presidencial / Anual)</option>
+                    <option value="regular" className="bg-white">Regular (Seguimiento)</option>
                     <option value="recomendacion_templo" className="bg-white">Recomendación para el Templo</option>
+                    <option value="ajuste_diezmo" className="bg-white">Ajuste de Diezmo</option>
                   </select>
                 </div>
 
@@ -489,17 +532,17 @@ export default function EntrevistasObispado() {
                   />
                 </div>
                 <div>
-                  <label className={`block text-xs font-bold mb-1 ${form.tipo_entrevista === 'regular' ? 'text-outline/40' : 'text-on-surface'}`}>
+                  <label className={`block text-xs font-bold mb-1 ${form.tipo_entrevista !== 'recomendacion_templo' ? 'text-outline/40' : 'text-on-surface'}`}>
                     Vencimiento Templo (Ej. oct-26)
                   </label>
                   <input
                     type="text"
-                    disabled={form.tipo_entrevista === 'regular'}
+                    disabled={form.tipo_entrevista !== 'recomendacion_templo'}
                     value={form.fecha_vencimiento}
                     onChange={(e) => setForm({ ...form, fecha_vencimiento: e.target.value })}
                     placeholder="Ej. oct-26"
                     className={`w-full px-3.5 py-2.5 rounded-xl border text-sm ${
-                      form.tipo_entrevista === 'regular' 
+                      form.tipo_entrevista !== 'recomendacion_templo' 
                         ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed pointer-events-none select-none' 
                         : 'bg-white border-outline-variant/60 focus:ring-2 focus:ring-primary'
                     }`}
