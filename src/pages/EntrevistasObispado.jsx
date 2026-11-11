@@ -300,7 +300,7 @@ export default function EntrevistasObispado() {
                 <div className="mt-2 pt-2 border-t border-outline-variant/20">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[11px] font-bold text-on-surface-variant flex items-center gap-1">
-                      <MessageSquare size={12} /> Notas Pastorales / Acuerdos:
+                      <MessageSquare size={12} /> Notas / Acuerdos:
                     </span>
                     {editandoNotaId !== item.id && !estaRealizada && (
                       <button
@@ -511,7 +511,7 @@ export default function EntrevistasObispado() {
                 <label className="block text-xs font-bold text-on-surface mb-1">Observaciones / Motivo</label>
                 <textarea
                   rows={2}
-                  placeholder="Notas pastorales previas..."
+                  placeholder="Notas previas..."
                   value={form.observaciones}
                   onChange={(e) => setForm({ ...form, observaciones: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-outline-variant/60 text-sm focus:ring-2 focus:ring-primary"

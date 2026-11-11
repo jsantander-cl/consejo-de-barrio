@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { 
   Mic, 
   Calendar as CalendarIcon, 
@@ -10,7 +10,10 @@ import {
   UserPlus,
   Trash2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  Copy,
+  Check
 } from 'lucide-react'
 import { Card, StatusBadge } from '../components/ui.jsx'
 import { supabase } from '../lib/supabaseClient.js'
@@ -155,17 +158,14 @@ export default function Discursantes() {
     setModalCalendario(true)
   }
 
-  // Obtener exclusivamente los días DOMINGO del mes/año actual
   const obtenerDomingosDelMes = (year, month) => {
     const domingos = []
     const fecha = new Date(year, month, 1)
     
-    // Avanzar hasta el primer domingo del mes
     while (fecha.getDay() !== 0) {
       fecha.setDate(fecha.getDate() + 1)
     }
     
-    // Recolectar todos los domingos que pertenezcan al mes
     while (fecha.getMonth() === month) {
       domingos.push(new Date(fecha))
       fecha.setDate(fecha.getDate() + 7)
@@ -197,13 +197,14 @@ export default function Discursantes() {
         )}
       </div>
 
-      {/* TIRA DE FECHAS (4 en móvil, 6 en desktop) */}
+      {/* TIRA DE FECHAS */}
       <div className="bg-surface-container-low p-3 md:p-4 rounded-2xl border border-outline-variant/30">
         <div className="flex items-center justify-between mb-3">
           <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
             Seleccionar Reunion Sacramental:
           </label>
           <button 
+            type="button"
             onClick={abrirCalendario}
             className="flex items-center gap-1.5 bg-primary-container text-on-tertiary px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-primary-container/80 transition-colors"
           >
@@ -277,6 +278,7 @@ export default function Discursantes() {
               <div className="flex items-center justify-between w-full">
                 <span className="text-lg font-bold text-primary">Historial Reciente</span>
                 <button
+                  type="button"
                   onClick={() => setModalAbierto(true)}
                   className="p-1.5 bg-primary-container text-white hover:bg-primary hover:text-white rounded-lg transition-colors"
                   title="Gestionar candidatos e historial"
@@ -304,15 +306,13 @@ export default function Discursantes() {
         </div>
       </div>
 
-      {/* --------------------------------------------------- */}
-      {/* MODAL: CALENDARIO EXCLUSIVO DE DOMINGOS             */}
-      {/* --------------------------------------------------- */}
+      {/* MODAL: CALENDARIO */}
       {modalCalendario && (
         <div className="fixed inset-0 bg-inverse-surface/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 shadow-2xl transition-all">
-          <div className="bg-surface rounded-3xl shadow-xl w-full max-w-[320px] overflow-hidden border border-outline-variant/20 transform scale-100 animate-in fade-in zoom-in-95 duration-200">
-            {/* Header del Calendario */}
+          <div className="bg-surface rounded-3xl shadow-xl w-full max-w-[320px] overflow-hidden border border-outline-variant/20">
             <div className="flex items-center justify-between p-5 bg-surface-container-lowest border-b border-outline-variant/30">
               <button 
+                type="button"
                 onClick={() => {
                   if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); }
                   else { setCalMonth(m => m - 1); }
@@ -325,6 +325,7 @@ export default function Discursantes() {
                 {MESES[calMonth]} {calYear}
               </div>
               <button 
+                type="button"
                 onClick={() => {
                   if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); }
                   else { setCalMonth(m => m + 1); }
@@ -335,7 +336,6 @@ export default function Discursantes() {
               </button>
             </div>
 
-            {/* Listado Exclusivo de Domingos */}
             <div className="p-5 bg-surface-container-lowest space-y-2">
               <div className="text-xs font-bold text-on-surface-variant uppercase tracking-wider text-center mb-3">
                 Domingos del Mes
@@ -350,6 +350,7 @@ export default function Discursantes() {
                   return (
                     <button
                       key={fechaStr}
+                      type="button"
                       onClick={() => seleccionarDomingoCalendario(domingoObj)}
                       className={`w-full py-3 px-4 rounded-2xl text-sm font-bold flex items-center justify-between transition-all ${
                         esSeleccionado
@@ -365,9 +366,9 @@ export default function Discursantes() {
               </div>
             </div>
 
-            {/* Footer Calendario */}
             <div className="p-4 bg-surface-container-low/50 border-t border-outline-variant/30 flex justify-end">
               <button 
+                type="button"
                 onClick={() => setModalCalendario(false)}
                 className="text-xs font-bold text-primary hover:text-primary-container px-3 py-1.5"
               >
@@ -378,24 +379,22 @@ export default function Discursantes() {
         </div>
       )}
 
-      {/* --------------------------------------------------- */}
-      {/* MODAL: GESTIÓN DE CANDIDATOS E HISTORIAL COMPLETO   */}
-      {/* --------------------------------------------------- */}
+      {/* MODAL: GESTIÓN DE CANDIDATOS E HISTORIAL */}
       {modalAbierto && (
         <div className="fixed inset-0 bg-inverse-surface/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-surface rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] border border-outline-variant/20">
             <div className="px-6 py-5 border-b border-outline-variant/30 flex items-center justify-between bg-surface-container-lowest">
               <h2 className="text-xl font-bold text-primary tracking-tight">Gestión de Discursantes</h2>
-              <button onClick={() => setModalAbierto(false)} className="p-2 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors">
+              <button type="button" onClick={() => setModalAbierto(false)} className="p-2 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors">
                 <X size={20} />
               </button>
             </div>
 
             <div className="flex border-b border-outline-variant/30 bg-surface-container-lowest px-2 md:px-4">
-              <button onClick={() => setPestañaModal('candidatos')} className={`px-4 py-3 text-sm font-bold border-b-[3px] transition-colors ${pestañaModal === 'candidatos' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-primary'}`}>
+              <button type="button" onClick={() => setPestañaModal('candidatos')} className={`px-4 py-3 text-sm font-bold border-b-[3px] transition-colors ${pestañaModal === 'candidatos' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-primary'}`}>
                 Candidatos Sugeridos
               </button>
-              <button onClick={() => setPestañaModal('historial')} className={`px-4 py-3 text-sm font-bold border-b-[3px] transition-colors ${pestañaModal === 'historial' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-primary'}`}>
+              <button type="button" onClick={() => setPestañaModal('historial')} className={`px-4 py-3 text-sm font-bold border-b-[3px] transition-colors ${pestañaModal === 'historial' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-primary'}`}>
                 Historial General
               </button>
             </div>
@@ -419,10 +418,10 @@ export default function Discursantes() {
                         <div key={c.id} className="flex items-center justify-between p-3.5 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-sm">
                           <span className="font-semibold text-primary text-sm">{c.nombre}</span>
                           <div className="flex items-center gap-2">
-                            <button onClick={() => usarCandidato(c.nombre)} className="text-xs bg-secondary/10 text-secondary-container-on px-4 py-2 rounded-lg font-bold hover:bg-secondary/20 transition-colors">
+                            <button type="button" onClick={() => usarCandidato(c.nombre)} className="text-xs bg-secondary/10 text-secondary-container-on px-4 py-2 rounded-lg font-bold hover:bg-secondary/20 transition-colors">
                               Asignar
                             </button>
-                            <button onClick={() => handleEliminarCandidato(c.id)} className="p-2 text-outline hover:text-error hover:bg-error-container/50 rounded-lg transition-colors">
+                            <button type="button" onClick={() => handleEliminarCandidato(c.id)} className="p-2 text-outline hover:text-error hover:bg-error-container/50 rounded-lg transition-colors">
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -463,10 +462,22 @@ export default function Discursantes() {
   )
 }
 
-// Subcomponente de validación
+// Subcomponente de validación e inclusión del botón "Crear invitación"
 function RenderInputDiscursante({ num, label, data, setData, repeticion }) {
+  const [modalInvitacionAbierto, setModalInvitacionAbierto] = useState(false)
+  const [copiado, setCopiado] = useState(false)
+
+  const copiarTextoInvitacion = () => {
+    const texto = `REUNIÓN SACRAMENTAL\nEstimado(a) hermano(a):\n\n${data.nombre || '[NOMBRE DEL MIEMBRO]'}\nEl Obispado del Barrio Cerro Moreno tiene el agrado de invitarle a participar como discursante en nuestra reunión sacramental.\nTEMA ASIGNADO:\n\n${data.tema || '[TEMA DEL DISCURSO]'}\n\nSerá una bendición contar con su participación y testimonio, los cuales contribuirán a fortalecer la fe y edificar espiritualmente a los miembros de nuestra congregación.\nAgradecemos su disposición y servicio al Señor.\n\nCon aprecio fraternal,\nObispado Barrio Cerro Moreno\nEstaca La Portada`
+
+    navigator.clipboard.writeText(texto).then(() => {
+      setCopiado(true)
+      setTimeout(() => setCopiado(false), 2500)
+    })
+  }
+
   return (
-    <div className={`p-5 rounded-3xl border transition-all space-y-4 ${repeticion ? 'bg-rose-50/70 border-rose-300/80 shadow-sm' : 'bg-surface-container-lowest border-outline-variant/40 shadow-xs'}`}>
+    <div className={`p-5 rounded-3xl border transition-all space-y-4 relative ${repeticion ? 'bg-rose-50/70 border-rose-300/80 shadow-sm' : 'bg-surface-container-lowest border-outline-variant/40 shadow-xs'}`}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <label className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-2">
           <span className="w-6 h-6 rounded-full bg-primary text-white text-[12px] flex items-center justify-center font-extrabold shrink-0 shadow-sm">
@@ -504,7 +515,7 @@ function RenderInputDiscursante({ num, label, data, setData, repeticion }) {
         />
       </div>
 
-      <div className="flex items-center pt-2 text-sm border-t border-outline-variant/20">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 text-sm border-t border-outline-variant/20">
         <label className="flex items-center gap-2.5 cursor-pointer text-on-surface-variant font-medium group">
           <input
             type="checkbox"
@@ -514,7 +525,82 @@ function RenderInputDiscursante({ num, label, data, setData, repeticion }) {
           />
           <span className="group-hover:text-primary transition-colors">Confirmado / Notificado</span>
         </label>
+
+        {/* Botón Crear Invitación en la esquina inferior derecha de la card */}
+        <button
+          type="button"
+          onClick={() => setModalInvitacionAbierto(true)}
+          className="inline-flex items-center gap-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-2xs self-end sm:self-auto"
+        >
+          <Sparkles size={14} /> Crear invitación
+        </button>
       </div>
+
+      {/* MODAL: VENTANA EMERGENTE DE LA INVITACIÓN MINIMALISTA */}
+      {modalInvitacionAbierto && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-outline-variant/30 flex flex-col gap-6 relative">                   
+
+            {/* Tarjeta de invitación minimalista */}
+            <div className="bg-gradient-to-br from-slate-50 via-white to-sky-50/30 border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-inner text-slate-800 space-y-4">
+              <div className="text-center pb-3 border-b border-slate-200">
+                <p className="text-[10px] tracking-widest font-bold text-sky-700 uppercase">Barrio Cerro Moreno · Estaca La Portada</p>
+                <h3 className="text-base font-bold text-slate-900 mt-1">Reunión Sacramental</h3>
+              </div>
+
+              <div className="space-y-3 text-xs leading-relaxed text-slate-700">
+                <p className="font-medium text-slate-900">Estimado(a) hermano(a):</p>
+                
+                <p className="text-sm font-extrabold text-sky-900 bg-sky-50/80 px-3 py-2 rounded-xl border border-sky-100 text-center">
+                  {data.nombre || '[NOMBRE DEL MIEMBRO]'}
+                </p>
+
+                <p className="text-slate-600">
+                  El Obispado del Barrio Cerro Moreno tiene el agrado de invitarle a participar como discursante en nuestra reunión sacramental.
+                </p>
+
+                <div className="bg-slate-100/80 p-3.5 rounded-xl border border-slate-200/60 text-center space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tema Asignado</span>
+                  <p className="text-sm font-semibold text-slate-900 italic">
+                    "{data.tema || '[TEMA DEL DISCURSO]'}"
+                  </p>
+                </div>
+
+                <p className="text-slate-600 text-[11px]">
+                  Será una bendición contar con su participación y testimonio, los cuales contribuirán a fortalecer la fe y edificar espiritualmente a los miembros de nuestra congregación. Agradecemos su disposición y servicio al Señor.
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 text-center space-y-0.5">
+                <p className="text-[11px] font-bold text-slate-800">Con aprecio fraternal,</p>
+                <p className="text-xs font-extrabold text-sky-900">Obispado Barrio Cerro Moreno</p>
+                <p className="text-[10px] text-slate-500">Estaca La Portada</p>
+              </div>
+            </div>
+
+            {/* Acciones del modal */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setModalInvitacionAbierto(false)}
+                className="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              >
+                Cerrar
+              </button>
+              
+              <button
+                type="button"
+                onClick={copiarTextoInvitacion}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
+              >
+                {copiado ? <Check size={16} className="text-emerald-300" /> : <Copy size={16} />}
+                {copiado ? '¡Copiado al portapapeles!' : 'Copiar invitación'}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   )
 }
