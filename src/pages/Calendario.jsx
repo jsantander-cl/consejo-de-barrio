@@ -81,7 +81,7 @@ export default function Calendario() {
 
   const vencimientosDelDia = (asignaciones || []).filter((a) => a.fecha_limite === fechaSeleccionadaStr)
 
-  // Función para determinar si un día específico tiene eventos o tareas
+  // Función para determinar si un día específico tiene eventos o tareas (Corregida la distinción)
   const obtenerIndicadoresDia = (dia) => {
     if (!dia) return { tieneReunion: false, tieneActividad: false, tieneCompromiso: false }
 
@@ -90,14 +90,20 @@ export default function Calendario() {
     const evs = eventos.filter((e) => e.fecha && e.fecha.startsWith(fechaDiaStr))
     const vcs = (asignaciones || []).filter((a) => a.fecha_limite === fechaDiaStr)
 
+    // Consideramos reunión únicamente si el título empieza estrictamente con "[Reunión" o lo especifica el tipo
     const tieneReunion = evs.some((e) => {
-      const txt = ((e.nombre || e.titulo || '') + ' ' + (e.tipo || '')).toLowerCase()
-      return txt.includes('reunion') || txt.includes('reunión')
+      const titulo = (e.nombre || e.titulo || '').toLowerCase()
+      const tipo = (e.tipo || '').toLowerCase()
+      return titulo.startsWith('[reunión') || titulo.startsWith('[reunion') || tipo === 'reunion'
     })
+
     const tieneActividad = evs.some((e) => {
-      const txt = ((e.nombre || e.titulo || '') + ' ' + (e.tipo || '')).toLowerCase()
-      return !txt.includes('reunion') && !txt.includes('reunión')
+      const titulo = (e.nombre || e.titulo || '').toLowerCase()
+      const tipo = (e.tipo || '').toLowerCase()
+      const esReu = titulo.startsWith('[reunión') || titulo.startsWith('[reunion') || tipo === 'reunion'
+      return !esReu
     })
+
     const tieneCompromiso = vcs.length > 0
 
     return { tieneReunion, tieneActividad, tieneCompromiso }
@@ -110,7 +116,7 @@ export default function Calendario() {
         <div>
           <h1 className="text-2xl font-semibold text-primary tracking-tight">Calendario General de Ministración y Consejo</h1>
           <p className="text-sm text-on-surface-variant">
-            Sincronización unificada de sesiones presidenciales, deberes de templo y convenios del barrio.
+            Sincronización unificada de Reuniones de Liderazgo y Actividades del barrio.
           </p>
         </div>
         <button
@@ -232,8 +238,10 @@ export default function Calendario() {
             {eventosDelDia.map((ev) => {
               const horaTexto = ev.fecha ? new Date(ev.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 'Hora por definir'
               const tituloMostrar = ev.nombre || ev.titulo || 'Sin título'
-              const txtBusqueda = (tituloMostrar + ' ' + (ev.tipo || '')).toLowerCase()
-              const esReunion = txtBusqueda.includes('reunion') || txtBusqueda.includes('reunión')
+              
+              const tituloLower = tituloMostrar.toLowerCase()
+              const tipoLower = (ev.tipo || '').toLowerCase()
+              const esReunion = tituloLower.startsWith('[reunión') || tituloLower.startsWith('[reunion') || tipoLower === 'reunion'
 
               return (
                 <div key={ev.id} className="p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/20 space-y-2">
