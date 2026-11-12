@@ -112,7 +112,9 @@ export default function Compromisos() {
 
                       <div className="pt-2 border-t border-outline-variant/20 flex items-center justify-between text-xs">
                         <span className="font-medium text-on-surface">{item.usuarios?.nombre ?? 'Sin asignar'}</span>
-                        <span className={vencida ? 'text-red-600 font-semibold' : 'text-on-surface-variant'}>{item.fecha_limite}</span>
+                        <span className={vencida ? 'text-red-600 font-semibold' : 'text-on-surface-variant'}>
+                          {item.fecha_limite ? item.fecha_limite.split('-').reverse().join('-') : ''}
+                        </span>
                       </div>
 
                       {col.key !== 'cumplido' && (
